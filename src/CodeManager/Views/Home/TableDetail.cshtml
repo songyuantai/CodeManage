@@ -1,0 +1,35 @@
+﻿@model IEnumerable<DbTableColumn>
+@{
+    ViewData["Title"] = "ConnectionDetial";
+    Layout = "~/Views/Shared/_Layout_simple.cshtml";
+}
+
+<table class="table table-bordered table-hover mt-2">
+    <tr>
+        <th>列名</th>
+        <th>标识符</th>
+        <th>类型</th>
+        <th>长度</th>
+        <th>是否主键</th>
+        <th>是否可空</th>
+    </tr>
+    @foreach(var m in Model)
+    {
+        <tr class="content">
+            <td>@m.Comments</td>
+            <td>@m.ColumnName</td>
+            <td>@m.DataType</td>
+            <td>@m.DataLength</td>
+            <td>@(m.IsPrimaryKey ? "是":"否")</td>
+            <td>@(m.Nullable ? "是" : "否")</td>
+        </tr>
+    }
+
+    @if(!Model.Any()){
+        <tr>
+            <td colspan="6" class="text-center">
+                数据列表空...
+            </td>
+        </tr>
+    }
+</table>

@@ -1,0 +1,174 @@
+﻿@model IEnumerable<DbTable>
+@{
+    ViewData["Title"] = "ConnectionDetial";
+    Layout = "~/Views/Shared/_Layout_simple.cshtml";
+}
+
+<input id="connectionId" type="hidden" value="@ViewBag.id" />
+<div class="d-flex justify-content-between mt-2 mb-2">
+    <div>
+        <button class="btn btn-success" onclick="getTables();">
+            获取
+        </button>
+        <button class="btn btn-danger" onclick="del();">
+            删除
+        </button>
+    </div>
+    <div>
+        <button class="btn btn-primary" onclick="gen();">
+            生成
+        </button>
+    </div>
+</div>
+<form class="row g-3 mb-2">
+    <div class="col-md-4">
+        <label for="path">路径</label>
+        <input type="text" class="form-control" id="path" />
+    </div>
+    <div class="col-md-4">
+        <label for="nameSpace">命名空间</label>
+        <input type="text" class="form-control" id="nameSpace" />
+    </div>
+    <div class="col-md-4">
+        <label for="nameSpace">模板</label>
+        <select class="form-select" id="template">
+            <option value="simple">simple</option>
+            <option value="model">model</option>
+            <option value="xml">xml</option>
+        </select>
+    </div>
+</form>
+<table class="table table-bordered table-hover">
+    <tr>
+        <th class="text-center">
+            <input id="checkAll" type="checkbox" />
+        </th>
+        <th>表名</th>
+        <th>标识符</th>
+        <th>表空间</th>
+        <th class="text-center">操作</th>
+    </tr>
+    @foreach(var m in Model)
+    {
+        <tr class="content">
+            <td class="text-center">
+                <input name="check" type="checkbox" value="@m.Id"/>
+            </td>
+            <td>@m.Comments</td>
+            <td>@m.TableName</td>
+            <td>@m.TableSpaceName</td>
+            <td class="text-center">
+                <a href="javascript:void(0);" class="text-decoration-none" onclick="viewTable('@m.Id');">查看</a>
+            </td>
+        </tr>
+    }
+
+    @if(!Model.Any()){
+        <tr>
+            <td colspan="6" class="text-center">
+                数据列表空...
+            </td>
+        </tr>
+    }
+</table>
+
+@section scripts{
+    <script>
+
+        function viewTable(id) {
+            var href = "/Home/TableDetail/" + id;
+            Popup.openWin('查看表', href);
+        }
+
+        $(function() {
+            $('#checkAll').click(function () {
+                if ($(this).is(':checked')) {
+                    $('.content [name="check"]').prop('checked', true);
+                } else {
+                    $('.content [name="check"]').prop('checked', false);
+                }
+            })
+
+            $('.content').click(function (ev) {
+                var e = ev || window.event;
+                if ($(e.target).is('td')) {
+                    var check = $(this).find('[name="check"]');
+                    if (check.is(':checked')) {
+                        check.prop('checked', false);
+                    } else {
+                        check.prop('checked', true);
+                    }
+                }
+            });
+        })
+
+        function getTables() {
+            Popup.loading();
+            var id = $('#connectionId').val();
+            $.post('/Home/MergeAllTables/' + id, function(result) {
+                Popup.loaded();
+                if (result) {
+                    Popup.success('获取成功！');
+                    setTimeout(function() {
+                        location.href = location.href;
+                    }, 1000);
+                } else {
+                    Popup.error('获取失败，请检查！')
+                }
+            })
+        }
+
+        //保存数据
+        function gen() {
+            var checked = $('.content input[name="check"]:checked');
+            if (checked.length === 0) {
+                Popup.error('请选择数据后再保存！');
+            } else {
+                var ids = checked.map(function () {
+                    return $(this).val();
+                }).toArray();
+                var param = {
+                    ConnectId: $('#connectionId').val(),
+                    TableIds: ids,
+                    OutputPath: $('#path').val(),
+                    NameSpace: $('#nameSpace').val(),
+                    Template: $('#template').val()
+                };
+
+                Popup.loading();
+                $.post('/Home/Build/', param, function (result) {
+                    Popup.loaded();
+                    if (result) {
+                        Popup.success('生成成功！');
+                    } else {
+                        Popup.error('生成失败，请检查！')
+                    }
+                })
+            }
+        }
+
+        //删除数据
+        function del() {
+            var checked = $('.content input[name="check"]:checked');
+            if (checked.length === 0) {
+                Popup.error('请选择数据后再删除！');
+            } else {
+                var ids = checked.map(function () {
+                    return $(this).val();
+                }).toArray().join(',');
+                $.post("/Home/TableDel/", { id: ids }, function (success) {
+                    Popup.loaded();
+                    if (success) {
+                        Popup.success('删除成功！');
+                        setTimeout(function () {
+                            location.href = location.href;
+                        }, 1000);
+                    } else {
+                        Popup.error('删除失败！');
+                    }
+                })
+
+            }
+        }
+    </script>
+}

@@ -1,0 +1,88 @@
+﻿@model IEnumerable<DbConnection>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="d-flex justify-content-between">
+    <div>
+        <button class="btn btn-success" onclick="addConnection();">
+            新增
+        </button>
+    </div>
+    <div>
+        <button class="btn btn-primary" onclick="location.href=location.href;">
+            刷新
+        </button>
+    </div>
+</div>
+<table class="table table-bordered table-hover mt-2">
+    <tr>
+        <th>名称</th>
+        <th>用户</th>
+        <th>密码</th>
+        <th>连接字符串</th>
+        <th>类型</th>
+        <th class="text-center">操作</th>
+    </tr>
+    @foreach(var m in Model)
+    {
+        <tr>
+            <td>@m.Name</td>
+            <td>@m.UserName</td>
+            <td>@m.Password</td>
+            <td>@m.ConnectString</td>
+            <td>@m.DbType</td>
+            <td class="text-center">
+                <a href="javascript:void(0);" class="text-decoration-none" onclick="editConnection('@m.Id');">编辑</a> &nbsp;
+                <a href="javascript:void(0);" class="text-decoration-none" onclick="viewConnection('@m.Id');">查看</a> &nbsp;
+                <a href="javascript:void(0);" class="text-decoration-none" onclick="delConnection('@m.Id');">删除</a>
+            </td>
+        </tr>
+    }
+
+    @if(!Model.Any()){
+        <tr>
+            <td colspan="6" class="text-center">
+                数据列表空...
+            </td>
+        </tr>
+    }
+</table>
+
+@section scripts{
+    <script>
+        function addConnection() {
+            var href = "/Home/ConnectionAdd";
+            var width = '900px';
+            var height = '540px';
+            Popup.openWin('新增连接', href, width, height);
+        }
+
+        function editConnection(id) {
+            var href = "/Home/ConnectionEdit/" + id;
+            var width = '900px';
+            var height = '540px';
+            Popup.openWin('编辑连接', href, width, height);
+        }
+
+        function viewConnection(id) {
+            var href = "/Home/ConnectionDetail/" + id;
+            Popup.openWin('查看连接', href);
+        }
+
+        function delConnection(id) {
+            Popup.loading();
+            $.post("/Home/ConnectionDel/" + id, function(success){
+                Popup.loaded();
+                if (success) {
+                    Popup.success('删除成功！');
+                    setTimeout(function(){
+                        location.href = location.href;
+                    }, 1000);
+                } else {
+                    Popup.error('删除失败！');
+                }
+            })
+        }
+    </script>
+}

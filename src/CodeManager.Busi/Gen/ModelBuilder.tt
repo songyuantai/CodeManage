@@ -1,0 +1,35 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="CodeManager.Core" #>
+<#@ import namespace="CodeManager.Model" #>
+
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
+
+namespace <#= _model.NameSpaceName #>
+{
+    /// <summary>
+    /// <#= _model.Table.Comments #>
+    ///</summary>
+    public class <#= Tool.PascalToCamel(_model.Table.TableName) #>
+    {
+
+    <# foreach (DbTableColumn item in _model.Columns)
+    { #>
+    <# var maxLength = item.DataLength == 0 ? string.Empty : $@", MaxLength = {item.DataLength}";#>
+#region <#= item.Comments #>
+        /// <summary>
+        /// <#= item.Comments #>
+        /// </summary>
+        [TableColumn(ColumnName = "<#= item.ColumnName #>", DbDataType = "<#= item.DataType #>", Description = "<#= item.Comments #>", IsPrimaryKey = <#= item.IsPrimaryKey.ToString().ToLower() #>, NotNull = <#= item.Nullable.ToString().ToLower()#>, DataPrecision = <#= item.DataPrecision #>, DataScale = <#= item.DataScale #><#= maxLength #>)])
+        public <#= Tool.GetTypeFromDbType(item.DataType, item.Nullable, item.DataPrecision) #> <#= item.ColumnName #> { get; set; }
+        #endregion
+
+    <# } #>
+
+    }
+}

@@ -1,0 +1,34 @@
+CREATE TABLE DbConnection
+(
+	Id Text PRIMARY KEY NOT NULL,
+	Name Text,
+  	UserName Text,
+        Password Text,
+	ConnectString Text,
+	DbType Text
+)
+
+CREATE TABLE DbTable
+(
+	Id Text PRIMARY KEY NOT NULL,
+	ConnectionId Text,
+  	TableName Text,
+        TableSpaceName Text,
+        Comments Text
+)
+
+CREATE TABLE DbTableColumn
+(
+	Id Text PRIMARY KEY NOT NULL,
+	ConnectionId Text,
+  	TableId Text,
+        ColumnName Text,
+	DataType Text,
+	Comments Text,
+	Nullable INTEGER,
+	IsPrimaryKey INTEGER,
+	DataPrecision INTEGER,
+	DataScale INTEGER,
+	DataLength INTEGER
+)
+
